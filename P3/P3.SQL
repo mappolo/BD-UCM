@@ -1,0 +1,249 @@
+/*
+DROP TABLE SUCURSALES;
+DROP TABLE CLIENTES;
+DROP TABLE PRESTAMOS;
+DROP TABLE PRESTATARIOS;
+DROP TABLE CUENTAS;
+DROP TABLE IMPOSITOR;
+*/
+
+/*
+CREATE TABLE SUCURSALES
+(NOMBRE VARCHAR(50) PRIMARY KEY,  
+CIUDAD VARCHAR(50), 
+ACTIVO NUMBER(20,2)
+);
+
+CREATE TABLE CLIENTES
+(NOMBRE VARCHAR(50) PRIMARY KEY,
+CALLE VARCHAR(50),
+CIUDAD VARCHAR(50)
+);
+
+CREATE TABLE PRESTAMOS
+(SUCURSAL VARCHAR(50) CONSTRAINT SC_P_FK FOREIGN KEY (SUCURSAL) REFERENCES SUCURSALES (NOMBRE) ON DELETE CASCADE, 
+PRESTAMO VARCHAR(50) PRIMARY KEY,
+IMPORTE NUMBER(20,2),
+CHECK (IMPORTE > 0)
+);
+
+CREATE TABLE PRESTATARIOS
+(CLIENTE VARCHAR(50) CONSTRAINT CL_P_FK FOREIGN KEY (CLIENTE) REFERENCES CLIENTES (NOMBRE) ON DELETE CASCADE, 
+PRESTAMO VARCHAR(50) CONSTRAINT PR_FK FOREIGN KEY (PRESTAMO) REFERENCES PRESTAMOS (PRESTAMO) ON DELETE CASCADE,
+PRIMARY KEY (CLIENTE,PRESTAMO)
+);
+
+CREATE TABLE CUENTAS
+(SUCURSAL VARCHAR(50) CONSTRAINT SC_FK FOREIGN KEY (SUCURSAL) REFERENCES SUCURSALES (NOMBRE) ON DELETE CASCADE, 
+CUENTA NUMBER(20) PRIMARY KEY,
+SALDO NUMBER(20,2)
+);
+
+CREATE TABLE IMPOSITOR
+(CLIENTE VARCHAR(50) CONSTRAINT CL_FK FOREIGN KEY (CLIENTE) REFERENCES CLIENTES (NOMBRE) ON DELETE CASCADE, 
+CUENTA VARCHAR(50) CONSTRAINT CNT_FK FOREIGN KEY (CUENTA) REFERENCES CUENTAS (CUENTA) ON DELETE CASCADE,
+PRIMARY KEY (CLIENTE, CUENTA)
+);
+*/
+
+CREATE TABLE SUCURSALES
+(NOMBRE VARCHAR(50) PRIMARY KEY,  
+CIUDAD VARCHAR(50), 
+ACTIVO NUMBER(30,2)
+);
+
+CREATE TABLE CLIENTES
+(NOMBRE VARCHAR(50) PRIMARY KEY,
+CALLE VARCHAR(50),
+CIUDAD VARCHAR(50)
+);
+
+CREATE TABLE PRESTAMOS
+(SUCURSAL VARCHAR(50) , 
+PRESTAMO NUMBER(20) PRIMARY KEY,
+IMPORTE NUMBER(20,2)
+);
+
+CREATE TABLE PRESTATARIOS
+(CLIENTE VARCHAR(50), 
+PRESTAMO NUMBER(20),
+PRIMARY KEY (CLIENTE,PRESTAMO)
+);
+
+CREATE TABLE CUENTAS
+(SUCURSAL VARCHAR(50), 
+CUENTA NUMBER(20) PRIMARY KEY,
+SALDO NUMBER(20,2)
+);
+
+CREATE TABLE IMPOSITOR
+(CLIENTE VARCHAR(50), 
+CUENTA NUMBER(20),
+PRIMARY KEY (CLIENTE, CUENTA)
+);
+
+/* INSERTAMOS VAlORES*/
+INSERT INTO SUCURSALES VALUES ('Sucursal_1','Madrid',10000000.00);
+INSERT INTO SUCURSALES VALUES ('Sucursal_2','Madrid',20000000.00);
+
+INSERT INTO CLIENTES VALUES ('Jose María Gutierrez Alonso','C/ La Alegría n 5','Madrid');
+INSERT INTO CLIENTES VALUES ('Matías Barroco del Campo','C/ Perdida n 7','Sevilla');
+
+INSERT INTO PRESTAMOS VALUES ('Sucursal_1', 00001, 500);
+INSERT INTO PRESTAMOS VALUES ('Sucursal_1', 00002, 1600);
+INSERT INTO PRESTAMOS VALUES ('Sucursal_2', 00003, 250);
+
+INSERT INTO PRESTATARIOS VALUES ('Jose María Gutierrez Alonso', 00001);
+INSERT INTO PRESTATARIOS VALUES ('Jose María Gutierrez Alonso', 00002);
+INSERT INTO PRESTATARIOS VALUES ('Matías Barroco del Campo', 00003);
+
+INSERT INTO CUENTAS VALUES ('Sucursal_1', 3000015151515, 5500);
+INSERT INTO CUENTAS VALUES ('Sucursal_2', 3000020202020, 12000);
+
+INSERT INTO IMPOSITOR VALUES ('Jose María Gutierrez Alonso', 3000015151515);
+INSERT INTO IMPOSITOR VALUES ('Matías Barroco del Campo', 3000020202020);
+
+/* PRIVILEGIOS CON ADMINUSER */
+GRANT CREATE VIEW TO GIIC22;
+ 
+/* VISTAS*/
+CREATE VIEW DIRCLIENTES AS
+SELECT NOMBRE, CALLE
+FROM CLIENTES;
+
+CREATE VIEW PRESTAMOSCLIENTES AS
+SELECT P.PRESTAMO, P.IMPORTE, PP.CLIENTE
+FROM PRESTAMOS P
+INNER JOIN PRESTATARIOS PP
+ON P.PRESTAMO = PP.PRESTAMO;
+
+/*
+Me deja cambiar sólo el nombre del cliente en la vista y difiere con los datos de las tablas
+*/
+
+									/* INDICES*/
+
+/* a) Crear un índice no único sobre la columna Ciudad de la tabla Sucursales. */
+CREATE INDEX indSucursalesCiudad ON Sucursales(Ciudad);
+
+
+/* b) Crear un índice único sobre las columnas Nombre y Calle de la vista dirClientes. ¿se puede?  */
+CREATE UNIQUE INDEX NOSEPUEDE ON dirClientes(Nombre, Calle);
+/* DA EL SIGUENTE ERROR
+
+Error que empieza en la línea 1 del comando:
+CREATE UNIQUE INDEX NOSEPUEDE ON dirClientes(Nombre, Calle)
+Error en la línea de comandos:1 Columna:34
+Informe de error:
+Error SQL: ORA-01702: una vista no es apropiada aquí
+01702. 00000 -  "a view is not appropriate here"
+*Cause:    
+*Action:
+
+*/
+
+/*
+c) Añadir un registro repetido en la tabla Sucursales y en la vista dirClientes y explicar el
+resultado. 
+*/
+/*Quitamos el PRIMARY KEY de la tabla SUCURSALES y añadimos un registro repetido*/
+ALTER TABLE SUCURSALES DROP PRIMARY KEY
+INSERT INTO SUCURSALES VALUES ('Sucursal_1', 'Madrid', '10000000')
+
+/* Añadimos un registro repetido en dirClientes*/
+INSERT INTO "GIIC22"."DIRCLIENTES" (NOMBRE, CALLE) VALUES ('Jose María Gutierrez Alonso', 'C/ La Alegría n 5')
+
+/* Da el siguiente error:
+ORA-00001: restricción única (GIIC22.SYS_C0030674) violada
+ORA-06512: en línea 1
+
+Se ha producido un error al guardar los cambios en la tabla "GIIC22"."DIRCLIENTES":
+Fila 3: ORA-00001: restricción única (GIIC22.SYS_C0030674) violada
+ORA-06512: en línea 1
+*/
+
+/*Quitamos el PRIMARY KEY de CLIENTES y volvemos a insertar dando un resultado correcto*/
+ALTER TABLE CLIENTES DROP PRIMARY KEY
+INSERT INTO DIRCLIENTES (NOMBRE, CALLE) VALUES ('Jose María Gutierrez Alonso', 'C/ La Alegría n 5')
+/*
+4) DISPARADORES
+*/
+/*Nos damos privilegios en ADMINUSER para ejecutar Triggers*/
+GRANT CREATE TRIGGER TO GIIC22;
+
+/*
+a) Crear la tabla Auditoría con los campos Operación, Tabla, Fecha, Hora.
+- El primero puede contener los valores INSERT, UPDATE o DELETE.
+- El segundo contendrá nombres de tabla.
+- El tercero una fecha
+- El último una hora.
+*/
+create table auditoria(
+OPERACION VARCHAR(25),
+TABLA VARCHAR(25),
+FECHA VARCHAR(25),
+HORA VARCHAR(25)
+);
+
+CREATE OR REPLACE TRIGGER AUDIT_INSERT 
+AFTER INSERT ON CLIENTES 
+BEGIN
+  INSERT INTO AUDITORIA VALUES ('INSERT','CLIENTES' ,TO_CHAR(SYSDATE,'DD/MM/YYYY'),TO_CHAR(SYSDATE,'HH24:MI'));
+END;
+
+CREATE OR REPLACE TRIGGER AUDIT_UPDATE 
+AFTER UPDATE ON CLIENTES 
+BEGIN
+  INSERT INTO AUDITORIA VALUES ('UPDATE','CLIENTES' ,TO_CHAR(SYSDATE,'DD/MM/YYYY'),TO_CHAR(SYSDATE,'HH24:MI'));
+END;
+
+CREATE OR REPLACE TRIGGER AUDIT_DELETE
+AFTER DELETE ON CLIENTES 
+BEGIN
+  INSERT INTO AUDITORIA VALUES ('DELETE','CLIENTES' ,TO_CHAR(SYSDATE,'DD/MM/YYYY'),TO_CHAR(SYSDATE,'HH24:MI'));
+END;
+
+
+/*
+b) Crear y comprobar el funcionamiento de tres disparadores sobre la tabla Clientes de manera que
+se auditen los cambios producidos por inserciones, borrados y actualizaciones.
+*/
+INSERT INTO CLIENTES VALUES ('Marco Polo','C/ Traviesa n 2','Murcia');
+DELETE FROM CLIENTES WHERE CIUDAD = 'Murcia';
+UPDATE CLIENTES SET CIUDAD='Madrid' WHERE CIUDAD IS NULL;
+
+
+/*
+c) Trigger para mantener una desnormalización:
+Incluir en Sucursales una columna que inluya el número de préstamos y otra con el importe
+total de dichos préstamos.
+Escribir un trigger sobre la tabla Préstamos que mantenga dichas columnas actualizadas. 
+*/
+ALTER TABLE SUCURSALES ADD (TOTAL_PRES NUMBER(20),TOTAL_IMPORT NUMBER(20,2));
+
+/*------------------------*/
+SELECT sucursal, COUNT(*) TOTAL, SUM(importe)
+FROM prestamos
+group BY sucursal
+
+create or replace 
+TRIGGER ACT_SUCURSAL
+AFTER insert OR delete OR update ON PRESTAMOS
+ for each ROW
+BEGIN
+  IF INSERTING THEN          
+    UPDATE sucursales
+    SET total_pres=total_pres+1, 
+    TOTAL_IMPORT= TOTAL_IMPORT+:NEW.importe
+    WHERE nombre=:NEW.sucursal;
+  ELSIF UPDATING THEN
+    UPDATE sucursales
+    SET TOTAL_IMPORT= TOTAL_IMPORT-:OLD.importe+:NEW.importe
+    WHERE nombre=:NEW.sucursal;
+  ELSIF DELETING THEN 
+    UPDATE sucursales
+    SET total_pres=total_pres-1, 
+    TOTAL_IMPORT= TOTAL_IMPORT-:OLD.importe
+  WHERE nombre=:OLD.sucursal;
+  END IF;
+END;

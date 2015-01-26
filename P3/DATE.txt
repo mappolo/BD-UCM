@@ -1,0 +1,2 @@
+to_char(SYSDATE, 'DD/MM/YYYY')
+to_char(SYSDATE, 'HH24:MI')

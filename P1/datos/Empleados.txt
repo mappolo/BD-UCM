@@ -1,0 +1,4 @@
+Antonio Arjona;12345678A;5000;
+Carlota Cerezo;12345678C;1000;
+Laura López;12345678L;1500;
+Pedro Pérez;12345678P;2000;

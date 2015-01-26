@@ -1,0 +1,48 @@
+
+SQL*Loader: Release 11.2.0.1.0 - Production on Vie Nov 28 17:38:53 2014
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+Archivo de Control:   Telefonos.ctl
+Archivo de Datos:      Telefonos.txt
+  Archivo de Errores:     Telefonos.bad
+  Desechar Archivo:  ninguno especificado
+ 
+ (Permitir todos los registros desechados)
+
+Número a cargar: ALL
+Número a ignorar: 0
+Errores permitidos: 50
+Matriz de enlace:     64 filas, máximo de 256000 bytes
+Continuación:    ninguno especificado
+Ruta de acceso utilizada:      Convencional
+
+Tabla TELEFONOS, cargada de cada registro lógico.
+Opción INSERT activa para esta tabla: APPEND
+
+   Nombre Columna               Posición   Long  Term Entorno Tipo de Dato
+------------------------------ ---------- ----- ---- ---- ---------------------
+DNI                                 FIRST     *   ;       CHARACTER            
+TELEFONO                             NEXT     *   ;       CHARACTER            
+
+
+Tabla TELEFONOS:
+  5 Filas se ha cargado correctamente.
+  0 Filas no cargada debido a errores de datos.
+  0 Filas no cargada porque todas las cláusulas WHEN han fallado.
+  0 Filas no cargada porque todos los campos eran nulos.
+
+
+Espacio asignado a matriz de enlace:            33024 bytes (64 filas)
+Bytes de buffer de lectura: 1048576
+
+Total de registros lógicos ignorados:          0
+Total de registros lógicos leídos:           5
+Total de registros lógicos rechazados:         0
+Total de registros lógicos desechados:        0
+
+La ejecución empezó en Vie Nov 28 17:38:53 2014
+La ejecución terminó en Vie Nov 28 17:38:53 2014
+
+Tiempo transcurrido:     00:00:00.08
+Tiempo de CPU:         00:00:00.01

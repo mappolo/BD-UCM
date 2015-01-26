@@ -1,0 +1,55 @@
+
+SQL*Loader: Release 11.2.0.1.0 - Production on Jue Dic 4 19:41:03 2014
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+Archivo de Control:   CodigosPostales1.ctl
+Archivo de Datos:      codigospostales1.txt
+  Archivo de Errores:     codigospostales1.bad
+  Desechar Archivo:  ninguno especificado
+ 
+ (Permitir todos los registros desechados)
+
+Número a cargar: ALL
+Número a ignorar: 0
+Errores permitidos: 50
+Matriz de enlace:     64 filas, máximo de 256000 bytes
+Continuación:    ninguno especificado
+Ruta de acceso utilizada:      Convencional
+
+Tabla "Codigos Postales 1", cargada de cada registro lógico.
+Opción INSERT activa para esta tabla: APPEND
+
+   Nombre Columna               Posición   Long  Term Entorno Tipo de Dato
+------------------------------ ---------- ----- ---- ---- ---------------------
+CODIGOPOSTAL                        FIRST     *   ;       CHARACTER            
+POBLACION                            NEXT     *   ;       CHARACTER            
+PROVINCIA                            NEXT     *   ;       CHARACTER            
+
+Registro 4: Rechazado - Error en tabla "Codigos Postales 1", columna CODIGOPOSTAL.
+ORA-01400: no se puede realizar una inserción NULL en ("GIIC22"."Codigos Postales 1"."CODIGOPOSTAL")
+
+Registro 5: Rechazado - Error en tabla "Codigos Postales 1".
+ORA-00001: restricción única (GIIC22.CODPOS1_PK) violada
+
+
+Tabla "Codigos Postales 1":
+  5 Filas se ha cargado correctamente.
+  2 Filas no cargada debido a errores de datos.
+  0 Filas no cargada porque todas las cláusulas WHEN han fallado.
+  0 Filas no cargada porque todos los campos eran nulos.
+
+
+Espacio asignado a matriz de enlace:            49536 bytes (64 filas)
+Bytes de buffer de lectura: 1048576
+
+Total de registros lógicos ignorados:          0
+Total de registros lógicos leídos:           7
+Total de registros lógicos rechazados:         2
+Total de registros lógicos desechados:        0
+
+La ejecución empezó en Jue Dic 04 19:41:03 2014
+La ejecución terminó en Jue Dic 04 19:41:03 2014
+
+Tiempo transcurrido:     00:00:00.09
+Tiempo de CPU:         00:00:00.03
